@@ -1,12 +1,9 @@
 import ShortUrl from "../models/shortUrl.model.js";
 
-export const createShortUrlDAO = async (url, shortUrl, userId) => {
-  if (!url) {
-    return res.status(400).json({ error: "URL is required" });
-  }
+export const createShortUrlDAO = async (url, customShortUrl, userId) => {
   const newUrl = new ShortUrl({
     originalUrl: url,
-    shortUrl: shortUrl,
+    shortUrl: customShortUrl,
   });
   if (userId) {
     newUrl.user = userId;
@@ -15,13 +12,24 @@ export const createShortUrlDAO = async (url, shortUrl, userId) => {
 };
 
 export const getShortUrlByIdDAO = async (shortUrl) => {
-  console.log("DAO");
-
-  const url = await ShortUrl.findOne({ shortUrl });
-  if (!url) {
-    return res.status(404).json({ error: "URL not found" });
-  }
-  url.clicks += 1;
-  await url.save();
+  const url = await ShortUrl.findOneAndUpdate(
+    { shortUrl },
+    { $inc: { clicks: 1 } },
+    { new: true }
+  );
   return url;
+};
+
+export const getCustomShortUrlByIdDAO = async (customShortUrl) => {
+  const url = await ShortUrl.findOne({ customShortUrl });
+  // if (url) {
+  //   url.clicks += 1;
+  //   await url.save();
+  // }
+  return url;
+};
+
+export const getAllShortUrlDAO = async () => {
+  const urls = await ShortUrl.find();
+  return urls;
 };
